@@ -2,7 +2,8 @@
 
 /**
  * Bittrex API wrapper class
- * @author yuriy <eurweb@gmail.com>
+ * An API wrapper class for the Bittrex altcoin exchange platform (https://bittrex.com/home/api).
+ * @author yuriy <yurmob@gmail.com> , skype : de4eur
  * @created 21.11.2017
  */
 
@@ -11,23 +12,26 @@ class BittrexAPI
 	const BASE_URL   = 'https://bittrex.com/api/v1.1/';
 	
 	// public api
-	private $public_set = array('getmarkets','getcurrencies','getticker','getmarketsummaries','getorderbook','getmarkethistory');
+	protected $public_set = array('getmarkets','getcurrencies','getticker','getmarketsummaries','getorderbook','getmarkethistory');
 	// private
-	private $market_set = array('buylimit','selllimit','cancel','getopenorders');
-	private $account_set = array('getbalances','getbalance','getdepositaddress','withdraw','getorder','getorderhistory','getwithdrawalhistory','getdeposithistory');
+	protected $market_set = array('buylimit','selllimit','cancel','getopenorders');
+	protected $account_set = array('getbalances','getbalance','getdepositaddress','withdraw','getorder','getorderhistory','getwithdrawalhistory','getdeposithistory');
 	
-	private $apiKey    = 'YYYYY';
-	private $apiSecret = 'XXXXX';
+	protected $apiKey    = 'YYYYY';
+	protected $apiSecret = 'XXXXX';
 	
-	private $private_api = false;
+	protected $curl;
+	protected $private_api = false;
     
 	public function __construct ($apiKey='', $apiSecret='')
 	{
 		$this->apiKey    = $apiKey;
 		$this->apiSecret = $apiSecret;
+		$this->curl = curl_init();
+		curl_setopt($this->curl, CURLOPT_RETURNTRANSFER, true);
 	}
 	
-	public function  __call($name, $req  = array())
+	public function  __call($name, $req)
 	{
 		$name = strtolower ($name);
 		if (sizeof($req))
@@ -35,33 +39,29 @@ class BittrexAPI
 		return $this->apiCall($name, $req);
 	}
 	
-   private function apiCall($method, array $req) 
+   protected function apiCall($method, array $req) 
    {
    	  $url = $this->makeUrl($method, $req);
-      static $ch = null;
-      $ch = curl_init();
-      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-      //curl_setopt($ch, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; Cryptopia.co.nz API PHP client; FreeBSD; PHP/'.phpversion().')');
-      curl_setopt($ch, CURLOPT_URL, $url );
+   	  
+   	  //curl_setopt($this->curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; Cryptopia.co.nz API PHP client; FreeBSD; PHP/'.phpversion().')');
+   	  curl_setopt($this->curl, CURLOPT_URL, $url );
       
       if ($this->private_api)
       {
       	$nonce=time();
       	$sign_headers = hash_hmac('sha512', $uri, $this->apiSecret);
-      	curl_setopt($ch, CURLOPT_HTTPHEADER, $sign_headers);
+      	curl_setopt($this->curl, CURLOPT_HTTPHEADER, $sign_headers);
       }
       // run the query
-      curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-      curl_setopt($ch, CURLOPT_FRESH_CONNECT, TRUE); // Do Not Cache
-      $res = curl_exec($ch);
-      if ($res === false)
+      curl_setopt($this->curl, CURLOPT_SSL_VERIFYPEER, 0);
+      curl_setopt($this->curl, CURLOPT_FRESH_CONNECT, TRUE); // Do Not Cache
+      $res = curl_exec($this->curl);
+      if (!$res)
       {
-      	throw new Exception('Could not get reply: '.curl_error($ch));
+      	throw new Exception('Could not get reply: '.curl_error($this->curl));
       }
-      //var_dump($res);
-      $res = json_decode($res);
-      
-      if ($res->success == false) 
+      $res = json_decode($res); 
+      if (!$res->success) 
       {
       	throw new Exception ($res->message);
       }
@@ -69,7 +69,7 @@ class BittrexAPI
       return $res;  
    }
    
-   private function makeUrl($method, $req)
+   protected function makeUrl($method, $req)
    {
    	if ( in_array( $method ,$this->public_set ) )
    	{
@@ -93,7 +93,6 @@ class BittrexAPI
 
    	if (sizeof($req))
    	{
-   		//$url .= '?'.http_build_query($req);
    		$args = join('&' , $req);
    		$url= $url. '?' . $args;
    	}
