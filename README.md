@@ -8,7 +8,9 @@ You can use it to check market values, do tradings with your wallet, deposit and
 
 
 include 'BittrexAPI.php';
+
 $bittrex_api = new BittrexAPI();
+
 $res = $bittrex_api->getOrderbook(array('market=BTC-LTC','type=sell'));
 
 
