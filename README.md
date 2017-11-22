@@ -6,11 +6,9 @@ This class is a wrapper for the Bittrex altcoin trader platform API https://bitt
 You can use it to check market values, do tradings with your wallet, deposit and withdraw coins, write your own trading bot, etc.
 
 
-<?php 
+
 include 'BittrexAPI.php';
-
 $bittrex_api = new BittrexAPI();
-
 $res = $bittrex_api->getOrderbook(array('market=BTC-LTC','type=sell'));
 
-?>
+
