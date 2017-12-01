@@ -43,12 +43,11 @@ class BittrexAPI
    {
    	  $url = $this->makeUrl($method, $req);
    	  
-   	  //curl_setopt($this->curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; Cryptopia.co.nz API PHP client; FreeBSD; PHP/'.phpversion().')');
-   	  curl_setopt($this->curl, CURLOPT_URL, $url );
+       //curl_setopt($this->curl, CURLOPT_USERAGENT, 'Mozilla/4.0 (compatible; Cryptopia.co.nz API PHP client; FreeBSD; PHP/'.phpversion().')');
+       curl_setopt($this->curl, CURLOPT_URL, $url );
       
       if ($this->private_api)
       {
-      	$nonce=time();
       	$sign_headers = hash_hmac('sha512', $uri, $this->apiSecret);
       	curl_setopt($this->curl, CURLOPT_HTTPHEADER, $sign_headers);
       }
@@ -93,6 +92,7 @@ class BittrexAPI
 
    	if (sizeof($req))
    	{
+		$req['nonce']=time();
    		$args = join('&' , $req);
    		$url= $url. '?' . $args;
    	}
