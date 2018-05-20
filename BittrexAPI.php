@@ -3,7 +3,7 @@
 /**
  * Bittrex API wrapper class
  * An API wrapper class for the Bittrex altcoin exchange platform (https://bittrex.com/home/api).
- * @author yuriy <yurmob@gmail.com> , skype : de4eur
+ * @author yuriy eurweb@gmail.com
  * @created 21.11.2017
  */
 
